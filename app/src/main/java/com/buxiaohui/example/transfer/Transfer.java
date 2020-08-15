@@ -10,37 +10,27 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 
 public class Transfer {
-    private LinkedBlockingDeque<Goods> mGoodsList;
+    private ExecutorService mExecutorService;
+    private CountDownLatch mCountDownLatch;
+
+    private LinkedBlockingQueue<Goods> mGoodsList;
     private int mWorkerCount;
 
-    public Transfer(LinkedBlockingDeque<Goods> goodsList, int workerCount) {
-        this.mGoodsList = goodsList;
-        this.mWorkerCount = workerCount;
-        init();
-    }
 
-    public static LinkedBlockingDeque<Goods> createGoodsList(int size) {
-        if (size <= 0) {
-            throw new IllegalArgumentException("please consider to set a regular size");
-        }
-        LinkedBlockingDeque<Goods> list = new LinkedBlockingDeque<>(size);
-        for (int i = 0; i < size; i++) {
-            list.add(new Goods(i));
-        }
-        return list;
-    }
-
-    private ExecutorService mExecutorService;
 
     private Transfer() {
 
     }
 
-    private CountDownLatch mCountDownLatch;
+    public Transfer(LinkedBlockingQueue<Goods> goodsList, int workerCount) {
+        this.mGoodsList = goodsList;
+        this.mWorkerCount = workerCount;
+        init();
+    }
 
     private void init() {
         mExecutorService = Executors.newCachedThreadPool(new ThreadFactory() {
@@ -51,18 +41,38 @@ public class Transfer {
         });
     }
 
-    public void transfer() {
+    public void transfer(boolean countBalance) {
+        this.transfer(countBalance, false);
+    }
+
+    /**
+     * @param countBalance 工足量是否是均衡的（每个工人搬运的总数量近似->则视为均衡）
+     * @param timeBalance  工作频率是否是均衡的(工人交替搬运货物->则视为均衡) TODO 未实现
+     */
+    public void transfer(boolean countBalance, boolean timeBalance) {
         if (mGoodsList == null || mGoodsList.size() <= 0) {
             throw new IllegalArgumentException("please create goods list correctly");
         }
         if (mWorkerCount <= 0) {
             throw new IllegalArgumentException("please set regular number of worker");
         }
+        if (mWorkerCount > mGoodsList.size()) {
+            throw new IllegalArgumentException("please set Economic number of worker");
+        }
         mCountDownLatch = new CountDownLatch(mWorkerCount);
         ArrayList<Worker> workerList = new ArrayList<>(mWorkerCount);
-
+        int regularTransferSize = mGoodsList.size() / mWorkerCount;
+        int otherCount = mGoodsList.size() % mWorkerCount;
         for (int i = 0; i < mWorkerCount; i++) {
-            Worker worker = new Worker(i, mGoodsList, mCountDownLatch);
+            int maxTransferCount;
+            if (otherCount != 0 && i < otherCount) {
+                maxTransferCount = regularTransferSize + 1;
+            } else {
+                maxTransferCount = regularTransferSize;
+            }
+
+            Worker worker =
+                    new Worker(i, mGoodsList, mCountDownLatch, countBalance ? maxTransferCount : Integer.MAX_VALUE);
             workerList.add(worker);
             mExecutorService.submit(worker);
         }
@@ -71,7 +81,7 @@ public class Transfer {
             mCountDownLatch.await();
             Log.i("transfer", "complete");
             for (Worker worker : workerList) {
-                Log.i("transfer", "worker:" + worker.index + "-->" + getListStr(worker.mMyTransferList));
+                Log.i("transfer", "worker:" + worker.index + "-->" + getListStr(worker.getMyTransferList()));
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -79,57 +89,15 @@ public class Transfer {
 
     }
 
-    private static class Log {
-        private static boolean ENABLE = true;
-
-        public static final void i(String tag, String content) {
-            if (ENABLE) {
-                System.out.println(tag + "," + content);
-            }
+    public static LinkedBlockingQueue<Goods> createGoodsList(int size) {
+        if (size <= 0) {
+            throw new IllegalArgumentException("please consider to set a regular size");
         }
-    }
-
-    private static final class Worker extends IndexDesc implements Runnable {
-        private static final String TAG = "Worker";
-        private ArrayList<Goods> mMyTransferList;
-        private LinkedBlockingDeque<Goods> mTransferList;
-        private CountDownLatch mCountDownLatch;
-
-        public final ArrayList<Goods> getMyTransferList() {
-            return mMyTransferList;
+        LinkedBlockingQueue<Goods> list = new LinkedBlockingQueue<>(size);
+        for (int i = 0; i < size; i++) {
+            list.add(new Goods(i));
         }
-
-        public Worker(int index, LinkedBlockingDeque<Goods> transferList, CountDownLatch countDownLatch) {
-            super(index);
-            this.mTransferList = transferList;
-            this.mMyTransferList = new ArrayList<>();
-            this.mCountDownLatch = countDownLatch;
-        }
-
-        @Override
-        public void run() {
-            try {
-                while (mTransferList.size() != 0) {
-                    Goods goods = mTransferList.take();
-                    Log.i(TAG, "index:" + index + "->" + goods);
-                    mMyTransferList.add(goods);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } finally {
-                mCountDownLatch.countDown();
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "Worker{" +
-                    ", index=" + index +
-                    "\n" +
-                    ", ->" + getListStr(mMyTransferList) +
-                    '}';
-        }
-
+        return list;
     }
 
     public static <E extends Goods> String getListStr(List<E> list) {
@@ -155,58 +123,4 @@ public class Transfer {
         return stringBuilder.toString();
     }
 
-    private static final class Goods extends IndexDesc {
-        public Goods() {
-        }
-
-        public Goods(int index) {
-            super(index);
-        }
-
-        @Override
-        public String toString() {
-            return "Goods{" +
-                    "index=" + index +
-                    '}';
-        }
-    }
-
-    public static class IndexDesc {
-        protected int index;
-
-        public IndexDesc() {
-        }
-
-        public IndexDesc(int index) {
-            this.index = index;
-        }
-
-        public int getIndex() {
-            return index;
-        }
-
-        public void setIndex(int index) {
-            this.index = index;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) { return true; }
-            if (o == null || getClass() != o.getClass()) { return false; }
-            IndexDesc indexDesc = (IndexDesc) o;
-            return index == indexDesc.index;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(index);
-        }
-
-        @Override
-        public String toString() {
-            return "IndexDesc{" +
-                    "index=" + index +
-                    '}';
-        }
-    }
 }

@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         Transfer transfer = new Transfer(Transfer.createGoodsList(10),3);
-        transfer.transfer();
+        transfer.transfer(true);
     }
 
     private void setImage(ImageView imageView, boolean isSelect) {
