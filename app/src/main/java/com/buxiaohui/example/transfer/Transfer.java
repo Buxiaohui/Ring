@@ -6,7 +6,6 @@ package com.buxiaohui.example.transfer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,8 +18,6 @@ public class Transfer {
 
     private LinkedBlockingQueue<Goods> mGoodsList;
     private int mWorkerCount;
-
-
 
     private Transfer() {
 
@@ -108,15 +105,13 @@ public class Transfer {
             Iterator<E> iterator = list.iterator();
             while (iterator.hasNext()) {
                 E e = iterator.next();
-                String s;
                 if (e.index <= 9) {
-                    s = "  " + e.index;
+                    stringBuilder.append("  ").append(e.index);
                 } else if (e.index <= 99) {
-                    s = " " + e.index;
+                    stringBuilder.append(" ").append(e.index);
                 } else {
-                    s = "" + e.index;
+                    stringBuilder.append(e.index);
                 }
-                stringBuilder.append(s);
                 stringBuilder.append("、");
             }
         }
