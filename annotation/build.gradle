@@ -1,0 +1,11 @@
+/*
+ * Copyright (C) 2020 Baidu, Inc. All Rights Reserved.
+ */
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7

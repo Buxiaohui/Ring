@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        tools:context=".MainActivity">
+
+    <com.buxiaohui.example.ring.RoundImageView
+            android:id="@+id/route_img"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/timg"
+            app:roundedImageViewCornerRadius="5dp"
+            tools:visibility="visible" />
+
+    <RelativeLayout
+            android:id="@+id/ybanner"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginRight="10dp"
+            android:visibility="gone">
+
+        <ImageView
+                android:id="@+id/image1"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerHorizontal="true" />
+
+        <ImageView
+                android:id="@+id/image2"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_below="@id/image1"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10dp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="225dp"
+            android:layout_centerInParent="true"
+            android:clipChildren="false"
+            android:visibility="gone">
+
+        <ImageView
+                android:id="@+id/top"
+                android:layout_width="100dp"
+                android:layout_height="200dp"
+                android:background="#000000" />
+
+        <RelativeLayout
+                android:id="@+id/bottom_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/top"
+                android:layout_centerHorizontal="true">
+
+            <ImageView
+                    android:id="@+id/bottom"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="5dp"
+                    android:background="#000000" />
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerInParent="true"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+        <TextView
+                android:id="@+id/start"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#00FF00"
+                android:gravity="center"
+                android:text="Start"
+                android:textSize="18dp"
+                android:textStyle="bold" />
+
+        <TextView
+                android:id="@+id/stop"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_below="@id/top"
+                android:layout_weight="1"
+                android:background="#FF0000"
+                android:gravity="center"
+                android:text="Stop"
+                android:textSize="18dp"
+                android:textStyle="bold" />
+    </LinearLayout>
+
+    <com.buxiaohui.example.ring.CommuteGradientView
+            android:id="@+id/gradient_view"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_centerInParent="true"
+            android:background="@color/colorAccent" />
+
+    <TextView
+            android:id="@+id/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true" />
+</RelativeLayout>
