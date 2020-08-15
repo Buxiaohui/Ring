@@ -10,8 +10,8 @@ import org.junit.Test;
 public class TransferTest {
     @Test
     public void transferGoods(){
-        transfer(1000,10);
-        transfer(997,9);
+        transfer(5,3);
+//        transfer(997,9);
     }
 
     private void transfer(int goodsCount,int workerCount) {

@@ -69,10 +69,15 @@ public class Transfer {
             }
 
             Worker worker =
-                    new Worker(i, mGoodsList, mCountDownLatch, countBalance ? maxTransferCount : Integer.MAX_VALUE);
+                    new Worker(i, mGoodsList, mCountDownLatch, countBalance ? maxTransferCount :
+                            Integer.MAX_VALUE);
+            //            Worker worker =
+            //                    new Worker(i, mGoodsList, mCountDownLatch, Integer.MAX_VALUE);
             workerList.add(worker);
             mExecutorService.submit(worker);
         }
+        //        mExecutorService.submit(new Productor(0, 1001, mGoodsList, mCountDownLatch, 3));
+        //        mExecutorService.submit(new Productor(1, 1200, mGoodsList, mCountDownLatch, 3));
         mExecutorService.shutdown();
         try {
             mCountDownLatch.await();
